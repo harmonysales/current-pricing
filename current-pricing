@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>차량 가격조사·산정 시뮬레이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #F5F4F0;
+    --surface: #FFFFFF;
+    --surface2: #F0EFE9;
+    --border: #DDDBD3;
+    --border2: #C8C6BC;
+    --text1: #1A1916;
+    --text2: #5C5A53;
+    --text3: #9B9890;
+    --accent: #2B5CE6;
+    --accent-bg: #EEF2FD;
+    --danger: #C0392B;
+    --danger-bg: #FDECEA;
+    --warn: #B7621A;
+    --warn-bg: #FDF3E7;
+    --success: #1A7C4A;
+    --success-bg: #E8F7EF;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text1);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+  /* Header */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text1);
+  }
+  .logo-icon {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 14px;
+  }
+  .badge-quarter {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-bg);
+    border: 1px solid #c0cffa;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  /* Layout */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+  .page-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .page-sub {
+    font-size: 13px;
+    color: var(--text3);
+    margin-bottom: 2rem;
+  }
+  .grid-main {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 1.25rem;
+    align-items: start;
+  }
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .card-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: 0.02em;
+  }
+  .card-body { padding: 18px; }
+  /* Form elements */
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  label.field-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    margin-bottom: 5px;
+    letter-spacing: 0.01em;
+  }
+  select, input[type=number], input[type=text] {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--surface);
+    color: var(--text1);
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239B9890' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+  }
+  select:focus, input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(43,92,230,0.1);
+  }
+  .helper-text {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 4px;
+  }
+  /* Section label */
+  .sec-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+    margin: 18px 0 12px;
+  }
+  .sec-label:first-child { margin-top: 0; }
+  /* Check items */
+  .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .check-item:hover { border-color: var(--border2); background: var(--surface2); }
+  .check-item input[type=checkbox] { width: 15px; height: 15px; flex-shrink: 0; accent-color: var(--accent); }
+  .check-item.active { border-color: #c0cffa; background: var(--accent-bg); color: var(--accent); }
+  /* Part buttons */
+  .rank-block { margin-bottom: 14px; }
+  .rank-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .rank-1 { background: #EEF2FD; color: #2B5CE6; }
+  .rank-2 { background: #FDF3E7; color: #B7621A; }
+  .rank-A { background: #F3EEF8; color: #6B3FA0; }
+  .rank-B { background: #FDECEA; color: #C0392B; }
+  .rank-C { background: #F0F9F4; color: #1A7C4A; }
+  .parts-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+  .part-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    font-size: 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    background: var(--surface);
+    color: var(--text1);
+    transition: all 0.15s;
+  }
+  .part-btn:hover { border-color: var(--border2); background: var(--surface2); }
+  .part-btn.sel-X {
+    background: var(--danger-bg);
+    border-color: #e8a29a;
+    color: var(--danger);
+    font-weight: 600;
+  }
+  .part-btn.sel-W {
+    background: var(--warn-bg);
+    border-color: #e8c69a;
+    color: var(--warn);
+    font-weight: 600;
+  }
+  .legend-row {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text2);
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  /* Calc button */
+  .calc-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .calc-btn:hover { background: #1d4bcc; }
+  .calc-btn:active { transform: scale(0.99); }
+  /* Result panel */
+  .result-panel {
+    position: sticky;
+    top: 72px;
+  }
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .result-header {
+    background: var(--text1);
+    color: #fff;
+    padding: 16px 18px;
+  }
+  .result-header-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .result-price {
+    font-size: 30px;
+    font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace;
+    color: #fff;
+  }
+  .result-range {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .result-body { padding: 0; }
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 18px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .rk { color: var(--text2); }
+  .rv { font-weight: 600; font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+  .rv.pos { color: var(--success); }
+  .rv.neg { color: var(--danger); }
+  .result-placeholder {
+    padding: 40px 18px;
+    text-align: center;
+    color: var(--text3);
+    font-size: 13px;
+  }
+  .result-placeholder svg { margin-bottom: 10px; opacity: 0.3; }
+  /* Note */
+  .note-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 1rem;
+    line-height: 1.7;
+  }
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 20px 2rem;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 3rem;
+  }
+  /* Mobile */
+  @media (max-width: 700px) {
+    .grid-main { grid-template-columns: 1fr; }
+    .result-panel { position: static; }
+    .row2, .row3 { grid-template-columns: 1fr; }
+    .check-grid { grid-template-columns: 1fr; }
+    main { padding: 1.5rem 1rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🚗</div>
+      차량 가격조사·산정 시뮬레이터
+    </div>
+    <span class="badge-quarter">2025 Q4</span>
+  </div>
+</header>
+
+<main>
+  <p class="page-sub">한국자동차진단보증협회 2025년 4분기 기준서 기반 · 참고용 시뮬레이션</p>
+
+  <div class="grid-main">
+    <!-- 입력 영역 -->
+    <div>
+
+      <!-- STEP 1 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-num">1</div>
+          <span class="card-title">기본 차량 정보</span>
+        </div>
+        <div class="card-body">
+          <div class="row2">
+            <div class="field">
+              <label class="field-label">차종 구분</label>
+              <select id="carType">
+                <option value="passenger">승용자동차</option>
+                <option value="van">승합자동차</option>
+                <option value="truck">화물자동차</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">국산 / 수입</label>
+              <select id="origin">
+                <option value="domestic">국산</option>
+                <option value="imported">수입</option>
+              </select>
+            </div>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label class="field-label">차량 등급</label>
+              <select id="grade">
+                <option value="특C">특C (대형·수입)</option>
+                <option value="특B">특B</option>
+                <option value="특A">특A (중형)</option>
+                <option value="Ⅰ" selected>Ⅰ</option>
+                <option value="Ⅱ">Ⅱ (소형)</option>
+                <option value="Ⅲ">Ⅲ (경형)</option>
+                <option value="Ⅳ">Ⅳ (초소형)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">사용연수</label>
+              <select id="years">
+                <option value="0">당년~2년</option>
+                <option value="3" selected>3년</option>
+                <option value="4">4년</option>
+                <option value="5">5~9년</option>
+                <option value="10">10~14년</option>
+                <option value="15">15년 이상</option>
+              </select>
+            </div>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label class="field-label">보험개발원 기준가액 (만원)</label>
+              <input type="number" id="basePrice" value="3000" min="100" step="100"/>
+              <div class="helper-text">출시 기준가액</div>
+            </div>
+            <div class="field">
+              <label class="field-label">총 사용 월 수</label>
+              <input type="number" id="totalMonths" value="38" min="1" step="1"/>
+              <div class="helper-text">감가율 계수 산출 기준</div>
+            </div>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label class="field-label">실 주행거리 (km)</label>
+              <input type="number" id="actualKm" value="68000" step="1000"/>
+            </div>
+            <div class="field">
+              <label class="field-label">시세 정보 평균가격 (만원)</label>
+              <input type="number" id="marketPrice" value="0" step="100"/>
+              <div class="helper-text">0 입력 시 시세 보정 미적용</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-num">2</div>
+          <span class="card-title">자동차 종합상태</span>
+        </div>
+        <div class="card-body">
+          <div class="sec-label">색상 평가 (승용만 적용)</div>
+          <div class="row2">
+            <div class="field">
+              <label class="field-label">기본 색상</label>
+              <select id="colorBase">
+                <option value="none">무채색 (흰색·검정·회색) — 감점없음</option>
+                <option value="color">유채색 — 5% 감점</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">전체 도장 이력</label>
+              <select id="repaint">
+                <option value="none">해당없음</option>
+                <option value="same">표준색 도장 — 3% 감점</option>
+                <option value="diff">표준색 변경 — 6% 감점</option>
+                <option value="wrap">디자인 랩핑 — 9% 감점</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sec-label">특별이력 (중복 시 가장 큰 감점 적용)</div>
+          <div class="check-grid" id="specialHistory">
+            <label class="check-item" id="ci-flood">
+              <input type="checkbox" data-key="flood" data-rate="0.5" onchange="syncCheck(this)"> 침수 이력 &nbsp;<strong>−50%</strong>
+            </label>
+            <label class="check-item" id="ci-fire">
+              <input type="checkbox" data-key="fire" data-rate="0.5" onchange="syncCheck(this)"> 화재 이력 &nbsp;<strong>−50%</strong>
+            </label>
+            <label class="check-item" id="ci-totalloss">
+              <input type="checkbox" data-key="totalloss" data-rate="0.2" onchange="syncCheck(this)"> 전손 이력 &nbsp;<strong>−20%</strong>
+            </label>
+            <label class="check-item" id="ci-special">
+              <input type="checkbox" data-key="special" data-rate="0.5" onchange="syncCheck(this)"> 특수사용 (공사장 등) &nbsp;<strong>−50%</strong>
+            </label>
+          </div>
+
+          <div class="sec-label" style="margin-top:16px">용도변경 이력 (승용만 적용)</div>
+          <div class="row2">
+            <div class="field">
+              <label class="field-label">용도변경</label>
+              <select id="usage">
+                <option value="none">해당없음</option>
+                <option value="rent">렌터카 이력 — 7% 감점</option>
+                <option value="commercial">영업용 이력 — 15% 감점</option>
+                <option value="govt">관용 이력 — 7% 감점</option>
+                <option value="import">직수입 이력 — 15% 감점</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">주요 옵션 (가점)</label>
+              <select id="option">
+                <option value="none">해당없음</option>
+                <option value="navi">내비게이션</option>
+                <option value="sunroof">썬루프</option>
+                <option value="panorama">파노라마 썬루프</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-num">3</div>
+          <span class="card-title">사고·교환·수리 등 이력</span>
+        </div>
+        <div class="card-body">
+          <p style="font-size:12px;color:var(--text3);margin-bottom:12px;">부위 버튼을 클릭해 <strong style="color:var(--danger)">교환(X)</strong> → <strong style="color:var(--warn)">판금·용접(W)</strong> → 해제 순서로 선택하세요.</p>
+          <div class="legend-row">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--danger-bg);border:1px solid #e8a29a"></div> 교환 (X)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--warn-bg);border:1px solid #e8c69a"></div> 판금·용접 (W)</div>
+          </div>
+
+          <div class="rank-block">
+            <div class="rank-tag rank-1">1랭크 — 외판</div>
+            <div class="parts-wrap">
+              <button class="part-btn" data-part="hood" data-rank="1" onclick="cyclePart(this)">후드</button>
+              <button class="part-btn" data-part="fFender" data-rank="1" onclick="cyclePart(this)">프런트 펜더</button>
+              <button class="part-btn" data-part="doorFr" data-rank="1" onclick="cyclePart(this)">도어 (앞)</button>
+              <button class="part-btn" data-part="doorRr" data-rank="1" onclick="cyclePart(this)">도어 (뒤)</button>
+              <button class="part-btn" data-part="trunk" data-rank="1" onclick="cyclePart(this)">트렁크 리드</button>
+              <button class="part-btn" data-part="radSupport" data-rank="1" onclick="cyclePart(this)">라디에이터 서포트</button>
+            </div>
+          </div>
+          <div class="rank-block">
+            <div class="rank-tag rank-2">2랭크 — 외판</div>
+            <div class="parts-wrap">
+              <button class="part-btn" data-part="qPanel" data-rank="2" onclick="cyclePart(this)">쿼터 패널</button>
+              <button class="part-btn" data-part="roofPanel" data-rank="2" onclick="cyclePart(this)">루프 패널</button>
+              <button class="part-btn" data-part="sidePanel" data-rank="2" onclick="cyclePart(this)">사이드 실 패널</button>
+            </div>
+          </div>
+          <div class="rank-block">
+            <div class="rank-tag rank-A">A랭크 — 주요골격</div>
+            <div class="parts-wrap">
+              <button class="part-btn" data-part="fPanel" data-rank="A" onclick="cyclePart(this)">프런트 패널</button>
+              <button class="part-btn" data-part="crossMember" data-rank="A" onclick="cyclePart(this)">크로스 멤버</button>
+              <button class="part-btn" data-part="insidePanel" data-rank="A" onclick="cyclePart(this)">인사이드 패널</button>
+              <button class="part-btn" data-part="trunkFloor" data-rank="A" onclick="cyclePart(this)">트렁크 플로어</button>
+              <button class="part-btn" data-part="rearPanel" data-rank="A" onclick="cyclePart(this)">리어 패널</button>
+            </div>
+          </div>
+          <div class="rank-block">
+            <div class="rank-tag rank-B">B랭크 — 주요골격</div>
+            <div class="parts-wrap">
+              <button class="part-btn" data-part="sFrMember" data-rank="B" onclick="cyclePart(this)">사이드 멤버 (앞)</button>
+              <button class="part-btn" data-part="sRrMember" data-rank="B" onclick="cyclePart(this)">사이드 멤버 (뒤)</button>
+              <button class="part-btn" data-part="wheelFr" data-rank="B" onclick="cyclePart(this)">휠 하우스 (앞)</button>
+              <button class="part-btn" data-part="wheelRr" data-rank="B" onclick="cyclePart(this)">휠 하우스 (뒤)</button>
+              <button class="part-btn" data-part="pillerA" data-rank="B" onclick="cyclePart(this)">A 필러</button>
+              <button class="part-btn" data-part="pillerB" data-rank="B" onclick="cyclePart(this)">B 필러</button>
+              <button class="part-btn" data-part="pillerC" data-rank="B" onclick="cyclePart(this)">C 필러</button>
+            </div>
+          </div>
+          <div class="rank-block">
+            <div class="rank-tag rank-C">C랭크 — 주요골격</div>
+            <div class="parts-wrap">
+              <button class="part-btn" data-part="dash" data-rank="C" onclick="cyclePart(this)">대쉬 패널</button>
+              <button class="part-btn" data-part="floor" data-rank="C" onclick="cyclePart(this)">플로어 패널</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-num">4</div>
+          <span class="card-title">자동차 기타정보</span>
+        </div>
+        <div class="card-body">
+          <div class="row3">
+            <div class="field">
+              <label class="field-label">광택 상태</label>
+              <select id="polish">
+                <option value="ok">양호</option>
+                <option value="bad">불량 (감점)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">룸 크리닝</label>
+              <select id="roomClean">
+                <option value="ok">양호</option>
+                <option value="bad">불량 (감점)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">외장 상태</label>
+              <select id="exterior">
+                <option value="ok">양호</option>
+                <option value="minor">경미 (가치감가)</option>
+                <option value="repair">수리 필요</option>
+              </select>
+            </div>
+          </div>
+          <div class="row3">
+            <div class="field">
+              <label class="field-label">타이어 상태</label>
+              <select id="tire">
+                <option value="ok">양호</option>
+                <option value="minor">경미 흠집</option>
+                <option value="replace">교환 필요</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">유리 상태</label>
+              <select id="glass">
+                <option value="ok">양호</option>
+                <option value="minor">경미 흠집</option>
+                <option value="replace">교환 필요</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">추가 수리 비용 (만원)</label>
+              <input type="number" id="extraRepair" value="0" step="10"/>
+              <div class="helper-text">견적액 × 90% 자동 적용</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="calc-btn" onclick="calculate()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+        가격 산정하기
+      </button>
+    </div>
+
+    <!-- 결과 패널 -->
+    <div class="result-panel">
+      <div class="result-card">
+        <div class="result-header">
+          <div class="result-header-label">최종 가격조사·산정 금액</div>
+          <div class="result-price" id="resultPrice">—</div>
+          <div class="result-range" id="resultRange">입력 후 산정하기를 눌러주세요</div>
+        </div>
+        <div class="result-body" id="resultBody">
+          <div class="result-placeholder">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+            <p>차량 정보를 입력하고<br/>산정하기 버튼을 눌러주세요</p>
+          </div>
+        </div>
+      </div>
+      <div class="note-box">
+        ⚠️ 본 시뮬레이터는 참고용입니다. 정식 가격조사·산정은 자동차관리법 제58조에 따라 자동차진단평가사의 현장 점검을 통해 이루어져야 합니다.
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  한국자동차진단보증협회 가격조사·산정기준서 2025년 4분기 기반 · 참고용 시뮬레이션 · 법적 효력 없음
+</footer>
+
+<script>
+const partState = {};
+
+function syncCheck(cb) {
+  const item = cb.closest('.check-item');
+  if (item) item.classList.toggle('active', cb.checked);
+}
+
+function cyclePart(btn) {
+  const key = btn.dataset.part;
+  const label = btn.textContent.replace(/ [XW]$/, '').trim();
+  const cur = partState[key] || 'none';
+  if (cur === 'none') {
+    partState[key] = 'X';
+    btn.className = 'part-btn sel-X';
+    btn.textContent = label + ' X';
+  } else if (cur === 'X') {
+    partState[key] = 'W';
+    btn.className = 'part-btn sel-W';
+    btn.textContent = label + ' W';
+  } else {
+    partState[key] = 'none';
+    btn.className = 'part-btn';
+    btn.textContent = label;
+  }
+}
+
+const RANK_COEF = {
+  passenger: {1:1.0,2:1.4,A:1.6,B:1.8,C:2.0},
+  van:       {1:0.8,2:1.0,A:1.4,B:1.6,C:1.8},
+  truck:     {1:0.8,2:1.0,A:1.4,B:1.6,C:1.8}
+};
+
+const GRADE_COEF = {
+  passenger: {
+    domestic: {'특C':2.8,'특B':2.5,'특A':2.2,'Ⅰ':1.8,'Ⅱ':1.4,'Ⅲ':1.0,'Ⅳ':0.8},
+    imported:  {'특C':3.0,'특B':2.8,'특A':2.5,'Ⅰ':2.2,'Ⅱ':1.8,'Ⅲ':1.4,'Ⅳ':1.0}
+  },
+  van: {
+    domestic: {'특C':2.8,'특B':2.5,'특A':2.2,'Ⅰ':1.8,'Ⅱ':1.4,'Ⅲ':1.0,'Ⅳ':0.8},
+    imported:  {'특C':3.0,'특B':2.8,'특A':2.5,'Ⅰ':2.2,'Ⅱ':1.8,'Ⅲ':1.4,'Ⅳ':1.0}
+  },
+  truck: {
+    domestic: {'특C':2.8,'특B':2.5,'특A':2.2,'Ⅰ':1.8,'Ⅱ':1.4,'Ⅲ':1.0,'Ⅳ':0.8},
+    imported:  {'특C':3.0,'특B':2.8,'특A':2.5,'Ⅰ':2.2,'Ⅱ':1.8,'Ⅲ':1.4,'Ⅳ':1.0}
+  }
+};
+
+const YEAR_COEF = {
+  domestic: {0:1.0,3:0.9,4:0.8,5:0.7,10:0.6,15:0.5},
+  imported:  {0:1.0,3:0.9,4:0.8,5:0.7,10:0.6,15:0.5}
+};
+
+const RESIDUAL = {
+  passenger: {
+    domestic: {0:0.518,3:0.518,4:0.437,5:0.368,10:0.262,15:0.262},
+    imported:  {0:0.500,3:0.500,4:0.412,5:0.340,10:0.232,15:0.232}
+  },
+  van: {
+    domestic: {0:0.510,3:0.510,4:0.426,5:0.357,10:0.250,15:0.250},
+    imported:  {0:0.510,3:0.510,4:0.426,5:0.357,10:0.250,15:0.250}
+  },
+  truck: {
+    domestic: {0:0.510,3:0.510,4:0.426,5:0.357,10:0.259,15:0.259},
+    imported:  {0:0.510,3:0.510,4:0.426,5:0.357,10:0.259,15:0.259}
+  }
+};
+
+// 승용 감가율표 (계수 1~60, 이후 근사)
+const DEPR = {1:100,2:98.96,3:97.92,4:96.88,5:95.85,6:94.81,7:93.77,8:92.74,9:91.7,10:90.66,11:89.62,12:88.59,13:87.55,14:86.65,15:85.75,16:84.85,17:83.95,18:83.05,19:82.15,20:81.25,21:80.36,22:79.46,23:78.56,24:77.66,25:76.76,26:75.97,27:75.18,28:74.4,29:73.61,30:72.82,31:72.04,32:71.25,33:70.46,34:69.68,35:68.89,36:68.11,37:67.32,38:66.65,39:65.99,40:65.32,41:64.66,42:63.99,43:63.33,44:62.66,45:62,46:61.33,47:60.67,48:60,49:59.34,50:58.75,51:58.16,52:57.57,53:56.98,54:56.39,55:55.8,56:55.21,57:54.62,58:54.04,59:53.45,60:52.86,61:52.27,62:51.74,63:51.21,64:50.68,65:50.16,66:49.63,67:49.1,68:48.57,69:48.05,70:47.52,71:46.99,72:46.47,73:45.94,74:45.49,75:45.04,76:44.59,77:44.15,78:43.7,79:43.25,80:42.8,81:42.36,82:41.91,83:41.46,84:41.01,85:40.57,86:40.16,87:39.75,88:39.35,89:38.94,90:38.53,91:38.13,92:37.72,93:37.31,94:36.91,95:36.5,96:36.09,97:35.69,98:35.31,99:34.94,100:34.57,110:30.9,120:27.7,130:24.7,140:21.85,150:19.29,160:16.98,170:14.76,180:12.65,190:9.65,200:9.13,210:8.61,220:8.1,230:7.58,240:7.06,250:6.89,260:6.73,270:6.56,280:6.39,290:6.23,300:6.06,310:5.89,320:5.73,330:5.56,340:5.39,350:5.23,360:5.06};
+
+function getDeprRate(months) {
+  const coef = months >= 12 ? 11 + months : 6 + months;
+  const c = Math.min(Math.max(1, coef), 360);
+  if (DEPR[c] !== undefined) return DEPR[c] / 100;
+  // interpolate
+  const keys = Object.keys(DEPR).map(Number).sort((a,b)=>a-b);
+  let lo = keys[0], hi = keys[keys.length-1];
+  for (let i = 0; i < keys.length-1; i++) {
+    if (keys[i] <= c && keys[i+1] >= c) { lo = keys[i]; hi = keys[i+1]; break; }
+  }
+  const t = (c - lo) / (hi - lo);
+  return (DEPR[lo] + t * (DEPR[hi] - DEPR[lo])) / 100;
+}
+
+function getResidual(ct, origin, yrs) {
+  const y = parseInt(yrs);
+  const t = RESIDUAL[ct][origin];
+  if (y <= 3) return t[0];
+  if (y === 4) return t[4];
+  if (y === 5) return t[5];
+  if (y >= 10) return t[10];
+  return t[5];
+}
+
+function calculate() {
+  const carType = document.getElementById('carType').value;
+  const origin  = document.getElementById('origin').value;
+  const grade   = document.getElementById('grade').value;
+  const yrs     = document.getElementById('years').value;
+  const yrsNum  = parseInt(yrs);
+  const basePrice   = parseFloat(document.getElementById('basePrice').value)   || 0;
+  const totalMonths = parseInt(document.getElementById('totalMonths').value)    || 12;
+  const actualKm    = parseInt(document.getElementById('actualKm').value)       || 0;
+  const marketPrice = parseFloat(document.getElementById('marketPrice').value)  || 0;
+  const extraRepair = parseFloat(document.getElementById('extraRepair').value)  || 0;
+
+  // 보정가격
+  const deprRate = getDeprRate(totalMonths);
+  const correctedPrice = Math.ceil(basePrice * deprRate);
+
+  // 시세 보정
+  let marketAdj = 0;
+  if (marketPrice > 0) {
+    const diff = marketPrice - correctedPrice;
+    const abs = Math.abs(diff);
+    let adj = 0;
+    if      (abs >= 1000) adj = Math.round((abs - 1000) * 0.8) + 800;
+    else if (abs >= 800)  adj = 800;
+    else if (abs >= 600)  adj = 600;
+    else if (abs >= 400)  adj = 400;
+    else if (abs >= 300)  adj = 300;
+    else if (abs >= 200)  adj = 200;
+    else if (abs >= 100)  adj = 100;
+    marketAdj = diff >= 0 ? adj : -adj;
+  }
+
+  const adjustedPrice = correctedPrice + marketAdj;
+  const prevPrice = Math.ceil(adjustedPrice * 1.13);
+  const residualRate = getResidual(carType, origin, yrs);
+  const yearCoef  = YEAR_COEF[origin][yrsNum] || 0.5;
+  const gradeCoef = (GRADE_COEF[carType][origin] || {})[grade] || 1.0;
+
+  // 주행거리
+  const stdKm = carType === 'passenger' ? totalMonths * 1.66 * 1000 : totalMonths * 2.5 * 1000;
+  let kmAdj = 0;
+  if (actualKm > 0 && actualKm !== stdKm) {
+    const raw = (prevPrice * (stdKm / actualKm) * residualRate) - (prevPrice * residualRate);
+    const maxP = Math.ceil(adjustedPrice * 0.2);
+    const maxN = Math.ceil(adjustedPrice * 0.4);
+    kmAdj = Math.max(-maxN, Math.min(maxP, Math.ceil(raw)));
+  }
+
+  // 색상
+  let colorAdj = 0;
+  if (carType === 'passenger') {
+    if (document.getElementById('colorBase').value === 'color')
+      colorAdj -= Math.ceil(adjustedPrice * 0.05 * yearCoef);
+    const rp = document.getElementById('repaint').value;
+    const rpRates = {same:0.03, diff:0.06, wrap:0.09};
+    if (rpRates[rp]) {
+      const ra = Math.ceil(adjustedPrice * rpRates[rp] * yearCoef);
+      if (-ra < colorAdj) colorAdj = -ra;
+    }
+  }
+
+  // 특별이력
+  let specialMax = 0;
+  document.querySelectorAll('#specialHistory input[type=checkbox]:checked').forEach(cb => {
+    const a = Math.ceil(adjustedPrice * parseFloat(cb.dataset.rate) * yearCoef);
+    specialMax = Math.max(specialMax, a);
+  });
+  const specialAdj = -specialMax;
+
+  // 용도변경
+  let usageAdj = 0;
+  if (carType === 'passenger') {
+    const uRates = {rent:0.07, commercial:0.15, govt:0.07, import:0.15};
+    const u = document.getElementById('usage').value;
+    if (uRates[u]) usageAdj = -Math.ceil(adjustedPrice * uRates[u] * yearCoef);
+  }
+
+  // 옵션
+  let optionAdj = 0;
+  const optType = document.getElementById('option').value;
+  const optCoefs = {navi:{0:60,3:40,4:40,5:30,10:30,15:30}, sunroof:{0:70,3:50,4:50,5:40,10:40,15:40}, panorama:{0:80,3:60,4:60,5:50,10:50,15:50}};
+  if (optType !== 'none' && optCoefs[optType]) {
+    if (!(optType === 'navi' && ['특A','특B','특C'].includes(grade))) {
+      const c = optCoefs[optType][yrsNum] || optCoefs[optType][5];
+      optionAdj = c;
+    }
+  }
+
+  // 사고수리이력
+  let accidentAdj = 0;
+  const activeParts = document.querySelectorAll('.part-btn.sel-X, .part-btn.sel-W');
+  if (activeParts.length > 0) {
+    const rc = RANK_COEF[carType] || RANK_COEF.passenger;
+    const gagaBase = {
+      '1': {hood:140, fFender:80, doorFr:110, doorRr:102, trunk:96, radSupport:66},
+      '2': {qPanel:176, roofPanel:186, sidePanel:116},
+      'A': {fPanel:164, crossMember:96, insidePanel:126, trunkFloor:188, rearPanel:102},
+      'B': {sFrMember:170, sRrMember:146, wheelFr:176, wheelRr:150, pillerA:152, pillerB:146, pillerC:140},
+      'C': {dash:170, floor:152}
+    };
+    const rankOrder = {'1':1,'2':2,'A':3,'B':4,'C':5};
+    let totalCoef = 0, maxRank = '1';
+    activeParts.forEach(btn => {
+      const rank = btn.dataset.rank;
+      const isX  = btn.classList.contains('sel-X');
+      let coef = (gagaBase[rank] && gagaBase[rank][btn.dataset.part]) || 100;
+      if (origin === 'imported') coef *= 2;
+      if (!isX) coef *= 0.5;
+      if (rank === '1' && isX && activeParts.length === 1) coef *= 0.5;
+      totalCoef += coef;
+      if (rankOrder[rank] > rankOrder[maxRank]) maxRank = rank;
+    });
+    const slt = carType === 'passenger' ? 4.8 : 6.8;
+    const rankApply = rc[maxRank] || 1.0;
+    accidentAdj = -Math.ceil((Math.sqrt(adjustedPrice * totalCoef) / slt) * rankApply);
+  }
+
+  // 광택·룸크리닝·외장
+  let polishAdj = 0, cleanAdj = 0, extAdj = 0;
+  if (document.getElementById('polish').value === 'bad')
+    polishAdj = -Math.ceil((origin === 'imported' ? 24 : 12) * gradeCoef);
+  if (document.getElementById('roomClean').value === 'bad')
+    cleanAdj = -Math.ceil((origin === 'imported' ? 30 : 15) * gradeCoef);
+  const extState = document.getElementById('exterior').value;
+  if (extState === 'minor') extAdj = -Math.ceil((origin === 'imported' ? 8 : 6) * gradeCoef);
+  else if (extState === 'repair') extAdj = -Math.ceil((origin === 'imported' ? 15 : 12) * gradeCoef);
+
+  // 타이어·유리
+  let tireAdj = 0, glassAdj = 0, repairAdj = 0;
+  const tireState = document.getElementById('tire').value;
+  if (tireState === 'minor') tireAdj = -Math.ceil(5 * gradeCoef);
+  else if (tireState === 'replace') tireAdj = -Math.ceil(extraRepair * 0.9);
+  const glassState = document.getElementById('glass').value;
+  if (glassState === 'minor') glassAdj = -Math.ceil((origin === 'imported' ? 15 : 10) * gradeCoef);
+  else if (glassState === 'replace') glassAdj = -Math.ceil((origin === 'imported' ? 35 : 10) * gradeCoef);
+  if (tireState !== 'replace' && extraRepair > 0) repairAdj = -Math.ceil(extraRepair * 0.9);
+
+  const totalAdj = kmAdj + colorAdj + specialAdj + usageAdj + optionAdj + accidentAdj + polishAdj + cleanAdj + extAdj + tireAdj + glassAdj + repairAdj;
+  const finalPrice = Math.ceil(adjustedPrice + totalAdj);
+  const allowMin = Math.ceil(finalPrice * 0.95);
+  const allowMax = Math.ceil(finalPrice * 1.05);
+
+  const fw = v => (v >= 0 ? '+' : '') + v.toLocaleString() + '만원';
+  const fm = v => v.toLocaleString() + '만원';
+
+  document.getElementById('resultPrice').textContent = fm(finalPrice);
+  document.getElementById('resultRange').textContent = `허용오차 ±5%: ${fm(allowMin)} ~ ${fm(allowMax)}`;
+
+  const rows = [
+    ['기준가액', fm(basePrice), ''],
+    [`감가 후 보정가격 (${(deprRate*100).toFixed(1)}%)`, fm(correctedPrice), ''],
+    marketAdj !== 0 ? ['시세 보정', fw(marketAdj), marketAdj >= 0 ? 'pos' : 'neg'] : null,
+    ['적용 보정가격', fm(adjustedPrice), ''],
+    kmAdj !== 0 ? [`주행거리 가감점 (표준 ${Math.round(stdKm/1000)}천 km)`, fw(kmAdj), kmAdj >= 0 ? 'pos' : 'neg'] : null,
+    colorAdj !== 0 ? ['색상 감점', fw(colorAdj), 'neg'] : null,
+    specialAdj !== 0 ? ['특별이력 감점', fw(specialAdj), 'neg'] : null,
+    usageAdj !== 0 ? ['용도변경 감점', fw(usageAdj), 'neg'] : null,
+    optionAdj !== 0 ? ['옵션 가점', fw(optionAdj), 'pos'] : null,
+    accidentAdj !== 0 ? ['사고수리이력 감점', fw(accidentAdj), 'neg'] : null,
+    polishAdj !== 0 ? ['광택 감점', fw(polishAdj), 'neg'] : null,
+    cleanAdj !== 0 ? ['룸크리닝 감점', fw(cleanAdj), 'neg'] : null,
+    extAdj !== 0 ? ['외장 감점', fw(extAdj), 'neg'] : null,
+    tireAdj !== 0 ? ['타이어 감점', fw(tireAdj), 'neg'] : null,
+    glassAdj !== 0 ? ['유리 감점', fw(glassAdj), 'neg'] : null,
+    repairAdj !== 0 ? ['수리비 감점', fw(repairAdj), 'neg'] : null,
+  ].filter(Boolean);
+
+  document.getElementById('resultBody').innerHTML = rows.map(([k,v,cls]) =>
+    `<div class="result-row"><span class="rk">${k}</span><span class="rv ${cls}">${v}</span></div>`
+  ).join('') + `<div class="result-row" style="background:var(--surface2);font-weight:600">
+    <span class="rk" style="color:var(--text1)">최종 산정가격</span>
+    <span class="rv" style="font-size:14px">${fm(finalPrice)}</span>
+  </div>`;
+
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+</script>
+</body>
+</html>
