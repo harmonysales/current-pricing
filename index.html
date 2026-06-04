@@ -680,8 +680,14 @@ function calculate(){
   if(marketPrice>0){const diff=marketPrice-correctedPrice,abs=Math.abs(diff);let adj=abs>=1000?Math.round((abs-1000)*0.8)+800:abs>=800?800:abs>=600?600:abs>=400?400:abs>=300?300:abs>=200?200:abs>=100?100:0;marketAdj=diff>=0?adj:-adj}
   const adjustedPrice=correctedPrice+marketAdj,prevPrice=Math.ceil(adjustedPrice*1.13);
   const stdKm=ct==='passenger'?totalMonths*1.66*1000:totalMonths*2.5*1000;
-  let kmAdj=0;
-  if(actualKm>0){const raw=(prevPrice*(stdKm/actualKm)*residualRate)-(prevPrice*residualRate);kmAdj=Math.max(-Math.ceil(adjustedPrice*0.4),Math.min(Math.ceil(adjustedPrice*0.2),Math.ceil(raw)))}
+let kmAdj=0;
+if(actualKm>0){
+  const divisor=ct==='passenger'?20:30;
+  const step1=(prevPrice-adjustedPrice)/divisor;
+  const step2=(stdKm-actualKm)/1000;
+  const raw=step1*step2*residualRate;
+  kmAdj=Math.max(-Math.ceil(adjustedPrice*0.4),Math.min(Math.ceil(adjustedPrice*0.2),Math.ceil(raw)));
+}
   let colorAdj=0;
   if(ct==='passenger'){if(document.getElementById('colorBase').value==='color')colorAdj-=Math.ceil(adjustedPrice*0.05*yearCoef);const rp=document.getElementById('repaint').value,rpR={same:0.03,diff:0.06,wrap:0.09};if(rpR[rp]){const ra=Math.ceil(adjustedPrice*rpR[rp]*yearCoef);if(-ra<colorAdj)colorAdj=-ra}}
   let specialMax=0;
