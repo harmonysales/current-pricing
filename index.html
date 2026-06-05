@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>차량 현재가격 산정 시뮬레이터</title>
+<title>중고차 가격 산정 시뮬레이터</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -124,7 +124,7 @@ select:focus,input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
   <div class="hdr-inner">
     <div class="logo">
       <div class="logo-icon">🚗</div>
-      <div class="logo-text">차량 가격 산정기 <span>2025년 4분기 기준</span></div>
+      <div class="logo-text">중고차 가격 산정기 <span>2025년 4분기 기준</span></div>
     </div>
     <div class="hdr-right">
       <span class="badge-q">2025 Q4</span>
@@ -190,8 +190,8 @@ select:focus,input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
 
 <main>
   <div class="hero">
-    <h1>차량의 현재 가격을 산정할 수 있어요. 🔍</h1>
-    <p>한국자동차진단보증협회 기준서를 바탕으로 차량의 현재 가격을 직접 산정해보세요. 모든 항목에 쉬운 설명이 있어요.</p>
+    <h1>내 차, 얼마일까? 🔍</h1>
+    <p>한국자동차진단보증협회 기준서를 바탕으로 중고차 가격을 직접 산정해보세요. 모든 항목에 쉬운 설명이 있어요.</p>
   </div>
 
   <div class="grid">
@@ -277,7 +277,9 @@ select:focus,input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
                 <option value="0">당년~2년</option>
                 <option value="3">3년</option>
                 <option value="4">4년</option>
-                <option value="5">5~9년</option>
+                <option value="5">5년</option>
+                <option value="6">6년</option>
+                <option value="7">7년 이상</option>
                 <option value="10">10~14년</option>
                 <option value="15">15년 이상</option>
               </select>
@@ -647,6 +649,10 @@ select:focus,input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
           </div>
         </div>
       </div>
+      <div class="note-box">
+        ⚠️ <strong>참고용 시뮬레이터입니다.</strong><br/>
+        정식 가격조사·산정은 자동차관리법 제58조에 따라 자동차진단평가사의 현장 점검을 통해 이루어져야 하며, 법적 효력은 없습니다.
+      </div>
     </div>
   </div>
 </main>
@@ -654,7 +660,7 @@ select:focus,input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 
 <script>
 const partState={};
 function resetAll(){if(!confirm('모든 입력값을 초기화할까요?'))return;['carType','origin','grade','years','vinState','colorBase','repaint','usage','option','polish','roomClean','exterior','tire','glass','basicItem','engineOil','coolant','transmission','steering'].forEach(id=>document.getElementById(id).selectedIndex=0);document.getElementById('grade').value='Ⅰ';document.getElementById('years').value='3';document.getElementById('basePrice').value=3000;document.getElementById('actualKm').value=68000;document.getElementById('marketPrice').value=0;document.getElementById('extraRepair').value=0;document.getElementById('regDate').value='';const today=new Date().toISOString().split('T')[0];document.getElementById('evalDate').value=today;document.getElementById('totalMonthsVal').textContent='—';document.querySelectorAll('.check-item input[type=checkbox]').forEach(cb=>{cb.checked=false;cb.closest('.check-item').classList.remove('active')});document.querySelectorAll('.part-btn').forEach(btn=>{const l=btn.textContent.replace(/ [XW]$/,'').trim();btn.className='part-btn';btn.textContent=l});Object.keys(partState).forEach(k=>delete partState[k]);document.getElementById('resultPrice').textContent='—';document.getElementById('resultRange').textContent='정보를 입력하고 산정하기를 눌러주세요';document.getElementById('resultBody').innerHTML='<div class="result-empty"><div class="em-icon">📋</div>좌측 항목을 입력하고<br/><strong>가격 산정하기</strong>를 눌러주세요</div>';document.getElementById('repairInfoBox').classList.remove('show')}
-function calcMonths(){const r=document.getElementById('regDate').value,e=document.getElementById('evalDate').value;if(!r||!e)return;const rd=new Date(r),ed=new Date(e);if(ed<rd){return}const m=(ed.getFullYear()-rd.getFullYear())*12+(ed.getMonth()-rd.getMonth());document.getElementById('totalMonthsVal').textContent=m;const y=ed.getFullYear()-rd.getFullYear()-(ed.getMonth()<rd.getMonth()||(ed.getMonth()===rd.getMonth()&&ed.getDate()<rd.getDate())?1:0);const ys=document.getElementById('years');if(y<=2)ys.value='0';else if(y===3)ys.value='3';else if(y===4)ys.value='4';else if(y<=9)ys.value='5';else if(y<=14)ys.value='10';else ys.value='15'}
+function calcMonths(){const r=document.getElementById('regDate').value,e=document.getElementById('evalDate').value;if(!r||!e)return;const rd=new Date(r),ed=new Date(e);if(ed<rd){return}const m=(ed.getFullYear()-rd.getFullYear())*12+(ed.getMonth()-rd.getMonth());document.getElementById('totalMonthsVal').textContent=m;const y=ed.getFullYear()-rd.getFullYear()-(ed.getMonth()<rd.getMonth()||(ed.getMonth()===rd.getMonth()&&ed.getDate()<rd.getDate())?1:0);const ys=document.getElementById('years');if(y<=2)ys.value='0';else if(y===3)ys.value='3';else if(y===4)ys.value='4';else if(y===5)ys.value='5';else if(y===6)ys.value='6';else if(y<=9)ys.value='7';else if(y<=14)ys.value='10';else ys.value='15'}
 window.addEventListener('DOMContentLoaded',()=>{const t=new Date().toISOString().split('T')[0];document.getElementById('evalDate').value=t});
 function syncCheck(cb){cb.closest('.check-item').classList.toggle('active',cb.checked)}
 function toggleRepairInfo(e){if(e)e.preventDefault();document.getElementById('repairInfoBox').classList.toggle('show')}
@@ -664,30 +670,24 @@ document.getElementById('gradeModal').addEventListener('click',function(e){if(e.
 function cyclePart(btn){const key=btn.dataset.part,label=btn.textContent.replace(/ [XW]$/,'').trim(),cur=partState[key]||'none';if(cur==='none'){partState[key]='X';btn.className='part-btn sel-X';btn.textContent=label+' X'}else if(cur==='X'){partState[key]='W';btn.className='part-btn sel-W';btn.textContent=label+' W'}else{partState[key]='none';btn.className='part-btn';btn.textContent=label}}
 const RANK_COEF={passenger:{'1':1.0,'2':1.4,'A':1.6,'B':1.8,'C':2.0},van:{'1':0.8,'2':1.0,'A':1.4,'B':1.6,'C':1.8},truck:{'1':0.8,'2':1.0,'A':1.4,'B':1.6,'C':1.8}};
 const GRADE_COEF={passenger:{domestic:{'특C':2.8,'특B':2.5,'특A':2.2,'Ⅰ':1.8,'Ⅱ':1.4,'Ⅲ':1.0,'Ⅳ':0.8},imported:{'특C':3.0,'특B':2.8,'특A':2.5,'Ⅰ':2.2,'Ⅱ':1.8,'Ⅲ':1.4,'Ⅳ':1.0}},van:{domestic:{'특C':2.8,'특B':2.5,'특A':2.2,'Ⅰ':1.8,'Ⅱ':1.4,'Ⅲ':1.0,'Ⅳ':0.8},imported:{'특C':3.0,'특B':2.8,'특A':2.5,'Ⅰ':2.2,'Ⅱ':1.8,'Ⅲ':1.4,'Ⅳ':1.0}},truck:{domestic:{'특C':2.8,'특B':2.5,'특A':2.2,'Ⅰ':1.8,'Ⅱ':1.4,'Ⅲ':1.0,'Ⅳ':0.8},imported:{'특C':3.0,'특B':2.8,'특A':2.5,'Ⅰ':2.2,'Ⅱ':1.8,'Ⅲ':1.4,'Ⅳ':1.0}}};
-const YEAR_COEF={domestic:{'0':1.0,'3':0.9,'4':0.8,'5':0.7,'10':0.6,'15':0.5},imported:{'0':1.0,'3':0.9,'4':0.8,'5':0.7,'10':0.6,'15':0.5}};
+const YEAR_COEF={domestic:{'0':1.0,'3':0.9,'4':0.8,'5':0.7,'6':0.7,'7':0.7,'10':0.6,'15':0.5},imported:{'0':1.0,'3':0.9,'4':0.8,'5':0.7,'6':0.7,'7':0.7,'10':0.6,'15':0.5}};
 const RESIDUAL={passenger:{domestic:{'0':0.518,'4':0.437,'5':0.368,'6':0.311,'7':0.262},imported:{'0':0.500,'4':0.412,'5':0.340,'6':0.281,'7':0.232}},van:{domestic:{'0':0.510,'4':0.426,'5':0.357,'6':0.298,'7':0.250},imported:{'0':0.510,'4':0.426,'5':0.357,'6':0.298,'7':0.250}},truck:{domestic:{'0':0.510,'4':0.426,'5':0.357,'6':0.298,'7':0.259},imported:{'0':0.510,'4':0.426,'5':0.357,'6':0.298,'7':0.259}}};
-  const DEPR={1:100,2:98.96,3:97.92,4:96.88,5:95.85,6:94.81,7:93.77,8:92.74,9:91.7,10:90.66,11:89.62,12:88.59,13:87.55,14:86.65,15:85.75,16:84.85,17:83.95,18:83.05,19:82.15,20:81.25,21:80.36,22:79.46,23:78.56,24:77.66,25:76.76,26:75.97,27:75.18,28:74.4,29:73.61,30:72.82,31:72.04,32:71.25,33:70.46,34:69.68,35:68.89,36:68.11,37:67.32,38:66.65,39:65.99,40:65.32,41:64.66,42:63.99,43:63.33,44:62.66,45:62,46:61.33,47:60.67,48:60,49:59.34,50:58.75,55:55.8,60:52.86,70:47.52,80:42.8,90:38.53,100:34.57,110:30.9,120:27.7,130:24.7,140:21.85,150:19.29,160:16.98,170:14.76,180:12.65,190:9.65,200:9.13,220:8.1,240:7.06,260:6.73,280:6.39,300:6.06,320:5.73,340:5.39,360:5.06};
+const DEPR={1:100,2:98.96,3:97.92,4:96.88,5:95.85,6:94.81,7:93.77,8:92.74,9:91.7,10:90.66,11:89.62,12:88.59,13:87.55,14:86.65,15:85.75,16:84.85,17:83.95,18:83.05,19:82.15,20:81.25,21:80.36,22:79.46,23:78.56,24:77.66,25:76.76,26:75.97,27:75.18,28:74.4,29:73.61,30:72.82,31:72.04,32:71.25,33:70.46,34:69.68,35:68.89,36:68.11,37:67.32,38:66.65,39:65.99,40:65.32,41:64.66,42:63.99,43:63.33,44:62.66,45:62,46:61.33,47:60.67,48:60,49:59.34,50:58.75,55:55.8,60:52.86,70:47.52,80:42.8,90:38.53,100:34.57,110:30.9,120:27.7,130:24.7,140:21.85,150:19.29,160:16.98,170:14.76,180:12.65,190:9.65,200:9.13,220:8.1,240:7.06,260:6.73,280:6.39,300:6.06,320:5.73,340:5.39,360:5.06};
 function getDeprRate(months){const coef=Math.min(Math.max(1,months>=12?11+months:6+months),360);if(DEPR[coef]!==undefined)return DEPR[coef]/100;const keys=Object.keys(DEPR).map(Number).sort((a,b)=>a-b);let lo=keys[0],hi=keys[keys.length-1];for(let i=0;i<keys.length-1;i++){if(keys[i]<=coef&&keys[i+1]>=coef){lo=keys[i];hi=keys[i+1];break}}return(DEPR[lo]+(coef-lo)/(hi-lo)*(DEPR[hi]-DEPR[lo]))/100}
-function getResidual(ct,origin,yrs){const y=parseInt(yrs),t=RESIDUAL[ct][origin];if(y<=3)return t['0'];if(y===4)return t['4'];if(y<=6)return t['5'];if(y>=10)return t['10'];return t['7']||t['10']}
-  function calculate(){
+function getResidual(ct,origin,yrs){const y=parseInt(yrs),t=RESIDUAL[ct][origin];if(y<=3)return t['0'];if(y===4)return t['4'];if(y===5)return t['5'];if(y===6)return t['6'];return t['7']}
+function calculate(){
   const ct=document.getElementById('carType').value,origin=document.getElementById('origin').value,grade=document.getElementById('grade').value,yrs=document.getElementById('years').value,yrsNum=parseInt(yrs);
   const basePrice=parseFloat(document.getElementById('basePrice').value)||0,extraRepair=parseFloat(document.getElementById('extraRepair').value)||0,marketPrice=parseFloat(document.getElementById('marketPrice').value)||0,actualKm=parseInt(document.getElementById('actualKm').value)||0;
   let totalMonths=parseInt(document.getElementById('totalMonthsVal').textContent);
-  if(isNaN(totalMonths)){const am={'0':12,'3':36,'4':48,'5':72,'10':144,'15':216};totalMonths=am[yrs]||36}
+  if(isNaN(totalMonths)){const am={'0':12,'3':36,'4':48,'5':60,'6':72,'7':96,'10':144,'15':216};totalMonths=am[yrs]||36}
   const gradeCoef=(GRADE_COEF[ct][origin]||{})[grade]||1.0,yearCoef=YEAR_COEF[origin][yrs]||0.5,deprRate=getDeprRate(totalMonths),residualRate=getResidual(ct,origin,yrs);
   const correctedPrice=Math.ceil(basePrice*deprRate);
   let marketAdj=0;
   if(marketPrice>0){const diff=marketPrice-correctedPrice,abs=Math.abs(diff);let adj=abs>=1000?Math.round((abs-1000)*0.8)+800:abs>=800?800:abs>=600?600:abs>=400?400:abs>=300?300:abs>=200?200:abs>=100?100:0;marketAdj=diff>=0?adj:-adj}
   const adjustedPrice=correctedPrice+marketAdj,prevPrice=Math.ceil(adjustedPrice*1.13);
   const stdKm=ct==='passenger'?totalMonths*1.66*1000:(grade==='특C'?totalMonths*8.33*1000:totalMonths*2.5*1000);
-let kmAdj=0;
-if(actualKm>0){
-  const divisor=ct==='passenger'?20:(grade==='특C'?100:30);
-  const step1=(prevPrice-adjustedPrice)/divisor;
-  const step2=(stdKm-actualKm)/1000;
-  const raw=step1*step2*residualRate;
-  kmAdj=Math.max(-Math.ceil(adjustedPrice*0.4),Math.min(Math.ceil(adjustedPrice*0.2),Math.ceil(raw)));
-}
+  let kmAdj=0;
+  if(actualKm>0){const divisor=ct==='passenger'?20:(grade==='특C'?100:30);const step1=(prevPrice-adjustedPrice)/divisor;const step2=(stdKm-actualKm)/1000;const raw=step1*step2*residualRate;kmAdj=Math.max(-Math.ceil(adjustedPrice*0.4),Math.min(Math.ceil(adjustedPrice*0.2),Math.ceil(raw)))}
   let colorAdj=0;
   if(ct==='passenger'){if(document.getElementById('colorBase').value==='color')colorAdj-=Math.ceil(adjustedPrice*0.05*yearCoef);const rp=document.getElementById('repaint').value,rpR={same:0.03,diff:0.06,wrap:0.09};if(rpR[rp]){const ra=Math.ceil(adjustedPrice*rpR[rp]*yearCoef);if(-ra<colorAdj)colorAdj=-ra}}
   let specialMax=0;
